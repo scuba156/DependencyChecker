@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>DependencyChecker</name>
+  <author>scuba156</author>
+  <targetVersion>0.17.0</targetVersion>
+  <description>
+Requires:
+  HugsLib 3.1.0+
+
+Version: 1
+  </description>
+</ModMetaData>
