@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DependencyChecker.Controllers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -133,7 +134,7 @@ namespace DependencyChecker {
         /// <summary>
         /// Schedules a dialog to display
         /// </summary>
-        internal static void ScheduleDialog(Window dialog, bool tryRemoveOtherDialogs = false) {
+        internal static void ScheduleDialog(Window dialog, bool tryRemoveOtherDialogs = false) { // This should be moved
             LongEventHandler.QueueLongEvent(() => {
                 if (tryRemoveOtherDialogs) {
                     List<Window> toRemove = Find.WindowStack.Windows.ToList().FindAll(win => win.layer != WindowLayer.GameUI).ListFullCopy();
@@ -150,17 +151,18 @@ namespace DependencyChecker {
         /// This is where the latest code will execute from
         /// </summary>
         private static void Execute() { // This is not version specific
-            // TODO: Get our list of mods to work on out of our GameObject and do stuff with them
+            //TODO: remove this log message
+            Log.Message(string.Format("We are executing on version {0}", CurrentAssemblyVersion.ToString()));
+
             var mods = CheckerEnabledMods;
             if (mods != null) {
-                // TODO: need to check here if the mod has issues before sending to dialog, the UI should not be doing any of the work
-
-                UI.Dialog_MissingAndOutDatedMods.CreateDialog(mods);
+                DependencyController.Start(mods);
             }
-            // We probably should clean up the GameObjects here. They should be destroyed on scene change and when
-            // RimWorld closes/restarts so they should not exist past the menus I believe, but better to be safe than
-            // sorry I guess.
-            Log.Message(string.Format("We are executing on version {0}", CurrentAssemblyVersion.ToString()));
+            else {
+                Log.Message("No mods were passed to " + CurrentAssemblyName);
+            }
+
+            TryDestroyGameObject();
         }
 
         /// <summary>
@@ -190,6 +192,15 @@ namespace DependencyChecker {
             CheckerEnabledMods = relatedModIDs;
 
             return latestCheckerVersion; // Return the latest version so we know if we should execute on this instance
+        }
+
+        /// <summary>
+        /// Destroys our GameObject if it exists
+        /// </summary>
+        private static void TryDestroyGameObject() { // This is not version specific
+            GameObject gameObject = GameObject.Find(TokenObjectName);
+            if (gameObject == null)
+                UnityEngine.Object.Destroy(gameObject);
         }
     }
 
