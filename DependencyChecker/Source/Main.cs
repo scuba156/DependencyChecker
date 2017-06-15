@@ -13,7 +13,7 @@ namespace DependencyChecker {
     /// This is where we find all loaded checker assemblies, mod related directories and execute on the latest version.
     /// </summary>
     [StaticConstructorOnStartup]
-    public static class DependencyChecker {
+    public static class Main {
 
         /// <summary>
         /// Token that identifies our game object
@@ -23,7 +23,7 @@ namespace DependencyChecker {
         /// <summary>
         /// Entry Point
         /// </summary>
-        static DependencyChecker() {
+        static Main() {
             try {
                 var latestVersion = LatestCheckerVersion; // Try and get our latest checker version GameObject
                 if (latestVersion == null) { // No GameObject was found
@@ -34,7 +34,7 @@ namespace DependencyChecker {
                 }
             }
             catch (Exception e) { // An exception occurred, output the version to help with debugging
-                Log.Error(string.Format("An exception was caused by {0} assembly version {1}. Exception was: {3}", CurrentAssemblyName, CurrentAssemblyVersion.ToString(), e));
+                Log.Error(string.Format("An exception was caused by {0} assembly version {1}. Exception was: {2}", CurrentAssemblyName, CurrentAssemblyVersion.ToString(), e));
             }
         }
 
@@ -46,30 +46,33 @@ namespace DependencyChecker {
         /// <summary>
         /// Get all checker assemblies that are not the executing assembly
         /// </summary>
-        private static List<Assembly> AllCheckerAssembliesExceptCurrent { get { return AllCheckerAssemblies.FindAll(ass => ass != Assembly.GetExecutingAssembly()); } }
+        private static List<Assembly> AllCheckerAssembliesExceptCurrent { get { return AllCheckerAssemblies.FindAll(ass => ass.FullName != Assembly.GetExecutingAssembly().FullName); } }
 
         /// <summary>
         /// Stores the latest checker version in a GameObject component. Returns null if it doesn't exist
         /// </summary>
-        private static List<CheckerEnabledMod> CheckerEnabledMods { // Getter is not version specific
+        private static List<string> CheckerEnabledMods { // Getter is not version specific
             get { // see LatestCheckerVersion Property for more info
                 var tokenObject = GameObject.Find(TokenObjectName);
                 if (tokenObject != null) {
-                    foreach (Assembly assembly in AllCheckerAssembliesExceptCurrent) {
+                    foreach (Assembly assembly in AllCheckerAssemblies) { // We need to check all assemblies including current
                         var component = tokenObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(CheckerEnabledModsComponent).Name));
                         if (component != null) {
-                            return (List<CheckerEnabledMod>)component.GetType().GetField("checkerEnabledMods").GetValue(component);
+                            return (List<string>)component.GetType().GetField("checkerEnabledModsIdentifiers").GetValue(component);
                         }
                     }
                 }
                 return null;
             }
             set {
-                GameObject gameObject = new GameObject(TokenObjectName);
+                GameObject gameObject = GameObject.Find(TokenObjectName);
+                if (gameObject == null)
+                    gameObject = new GameObject(TokenObjectName);
                 gameObject.SetActive(true);
                 gameObject.AddComponent(typeof(CheckerEnabledModsComponent));
                 CheckerEnabledModsComponent component = gameObject.GetComponent<CheckerEnabledModsComponent>();
-                component.checkerEnabledMods = value;
+                component.enabled = true;
+                component.checkerEnabledModsIdentifiers = value;
             }
         }
 
@@ -105,21 +108,42 @@ namespace DependencyChecker {
                     // tl;dr: This bit is done this way because I spent too long trying to get a better way to work. It seems to
                     // work so any future changes should not break previous versions and only provide speed enhancements.
 
-                    foreach (Assembly assembly in AllCheckerAssembliesExceptCurrent) {
+                    foreach (Assembly assembly in AllCheckerAssembliesExceptCurrent) { // We need to check all assemblies except current
                         var component = tokenObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(CheckerVersionComponent).Name));
                         if (component != null) // If our version component was found, return it, else look in next assembly
+                            {
                             return (Version)component.GetType().GetField("executingVersion").GetValue(component);
+                        }
                     }
                 }
                 return null; // Return null if GameObject or component was not found
             }
             set { // Creates a GameObject and stores the latest checker assembly version
-                GameObject gameObject = new GameObject(TokenObjectName);
+                GameObject gameObject = GameObject.Find(TokenObjectName);
+                if (gameObject == null)
+                    gameObject = new GameObject(TokenObjectName);
                 gameObject.SetActive(true);
                 gameObject.AddComponent(typeof(CheckerVersionComponent));
                 CheckerVersionComponent component = gameObject.GetComponent<CheckerVersionComponent>();
+                component.enabled = true;
                 component.executingVersion = value;
             }
+        }
+
+        /// <summary>
+        /// Schedules a dialog to display
+        /// </summary>
+        internal static void ScheduleDialog(Window dialog, bool tryRemoveOtherDialogs = false) {
+            LongEventHandler.QueueLongEvent(() => {
+                if (tryRemoveOtherDialogs) {
+                    List<Window> toRemove = Find.WindowStack.Windows.ToList().FindAll(win => win.layer != WindowLayer.GameUI).ListFullCopy();
+                    foreach (var win in toRemove) {
+                        if (!Find.WindowStack.TryRemove(win))
+                            Log.Message(CurrentAssemblyName + " failed to remove window of type" + win.GetType().Name);
+                    }
+                }
+                Find.WindowStack.Add(dialog);
+            }, null, false, null);
         }
 
         /// <summary>
@@ -127,7 +151,12 @@ namespace DependencyChecker {
         /// </summary>
         private static void Execute() { // This is not version specific
             // TODO: Get our list of mods to work on out of our GameObject and do stuff with them
+            var mods = CheckerEnabledMods;
+            if (mods != null) {
+                // TODO: need to check here if the mod has issues before sending to dialog, the UI should not be doing any of the work
 
+                UI.Dialog_MissingAndOutDatedMods.CreateDialog(mods);
+            }
             // We probably should clean up the GameObjects here. They should be destroyed on scene change and when
             // RimWorld closes/restarts so they should not exist past the menus I believe, but better to be safe than
             // sorry I guess.
@@ -142,13 +171,13 @@ namespace DependencyChecker {
         /// <returns>The version that should execute</returns>
         private static Version RunInitChecks() {
             var checkerAssemblyName = Assembly.GetExecutingAssembly().GetName(); // Hold our AssemblyName
-            var relatedMods = new List<CheckerEnabledMod>(); // Hold a list of mods that are related to our checker
+            var relatedModIDs = new List<string>(); // Hold a list of mods that are related to our checker
             Version latestCheckerVersion = checkerAssemblyName.Version; // Hold the version of the latest assembly
 
             foreach (ModContentPack modContentPack in LoadedModManager.RunningMods) {
                 foreach (var assembly in modContentPack.assemblies.loadedAssemblies) {
                     if (assembly.GetName().Name == checkerAssemblyName.Name) {
-                        relatedMods.Add(new CheckerEnabledMod(modContentPack)); // Add this mod to our list
+                        relatedModIDs.Add(modContentPack.Identifier); // Add this mod to our list
                         if (assembly.GetName().Version > latestCheckerVersion)
                             latestCheckerVersion = assembly.GetName().Version; // This assembly version is newer
                         break; // Already found a version of our assembly in this modpack
@@ -158,41 +187,23 @@ namespace DependencyChecker {
 
             // Create our GameObjects to be accessed by another instance
             LatestCheckerVersion = latestCheckerVersion;
-            CheckerEnabledMods = relatedMods;
+            CheckerEnabledMods = relatedModIDs;
 
             return latestCheckerVersion; // Return the latest version so we know if we should execute on this instance
         }
+    }
 
-        /// <summary>
-        /// A class to hold information on mods with DependencyChecker
-        /// </summary>
-        public class CheckerEnabledMod {
-            public readonly string identifier; // The mods identifier. Can be used later to get the mods ModMetaData if needed
-            public readonly string rootDir; // Might just remove this if we get the ModMetaData. would lower overhead.
+    /// <summary>
+    /// This is where we all the identifiers for mods we need to work with is stored within a GameObject Component
+    /// </summary>
+    public class CheckerEnabledModsComponent : MonoBehaviour {
+        public List<string> checkerEnabledModsIdentifiers = new List<string>();
+    }
 
-            // Decided to get the rootDir rather than a single file for compatibility by allowing us to add new supported files.
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public CheckerEnabledMod(ModContentPack mod) {
-                this.identifier = mod.Identifier;
-                rootDir = mod.RootDir;
-            }
-        }
-
-        /// <summary>
-        /// This is where we store information on all DependencyChecker enabled mods to store within a GameObject Component
-        /// </summary>
-        public class CheckerEnabledModsComponent : MonoBehaviour {
-            public List<CheckerEnabledMod> checkerEnabledMods = new List<CheckerEnabledMod>();
-        }
-
-        /// <summary>
-        /// This is where the latest version is stored within a GameObject Component
-        /// </summary>
-        public class CheckerVersionComponent : MonoBehaviour {
-            public Version executingVersion = new Version();
-        }
+    /// <summary>
+    /// This is where the latest version is stored within a GameObject Component
+    /// </summary>
+    public class CheckerVersionComponent : MonoBehaviour {
+        public Version executingVersion = new Version();
     }
 }

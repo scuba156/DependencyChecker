@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Linq;
-using Verse;
 
 namespace DependencyChecker.SupportedFiles {
 
@@ -17,8 +16,8 @@ namespace DependencyChecker.SupportedFiles {
             ParseXmlDocument(doc);
         }
 
-        public static DependenciesFile TryParseFile(ModContentPack modPack) {
-            string filepath = Path.Combine(modPack.RootDir, Path.Combine(aboutDir, dependenciesFileName));
+        public static DependenciesFile TryParseFile(string modRootDir) {
+            string filepath = Path.Combine(modRootDir, Path.Combine(aboutDir, dependenciesFileName));
             if (!File.Exists(filepath))
                 return null;
             try {

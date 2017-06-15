@@ -60,7 +60,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Source\SupportedFiles\DependenciesFile.cs" />
-    <Compile Include="Source\DependencyChecker.cs" />
+    <Compile Include="Source\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\Patches\Game_Patches\LoadGame_Patch.cs" />
     <Compile Include="Source\Patches\PlayDataLoader_Patches\DoPlayLoad_Patch.cs" />
