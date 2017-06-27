@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Verse;
 
 namespace DependencyChecker.SupportedFiles {
 
     public class DependenciesFile {
-        public string Identifier { get; private set; }
-        public string Name { get; private set; }
-        public string Steamid { get; private set; }
-        public Version RequiredVersion { get; private set; }
+        public List<DependencySaveableData> Dependencies { get; private set; }
+
         private const string aboutDir = "about";
         private const string dependenciesFileName = "dependencies.xml";
 
         internal DependenciesFile(XDocument doc) {
+            Dependencies = new List<DependencySaveableData>();
             ParseXmlDocument(doc);
         }
 
@@ -32,25 +33,26 @@ namespace DependencyChecker.SupportedFiles {
         private void ParseXmlDocument(XDocument doc) {
             if (doc.Root == null) throw new Exception("Missing root node");
             foreach (var element in doc.Root.Elements("dependency")) {
+                DependencySaveableData dependency = new DependencySaveableData();
                 switch (element.Name.LocalName.ToLower()) {
                     case "name":
                         if (element.Value != null)
-                            this.Name = element.Value;
+                            dependency.Name = element.Value;
                         break;
 
                     case "identifier":
                         if (element.Value != null)
-                            this.Identifier = element.Value;
+                            dependency.Identifier = element.Value;
                         break;
 
                     case "requiredversion":
                         if (element.Value != null)
-                            this.RequiredVersion = new Version(element.Value);
+                            dependency.RequiredVersion = new Version(element.Value);
                         break;
 
                     case "steamid":
                         if (element.Value != null)
-                            this.Steamid = element.Value;
+                            dependency.Steamid = element.Value;
 
                         break;
 
@@ -58,7 +60,15 @@ namespace DependencyChecker.SupportedFiles {
                         //Logger.Message("ignoring '{0}' as it is not a valid dependency element", element.Name.LocalName, doc);
                         break;
                 }
+                Dependencies.Add(dependency);
             }
         }
+    }
+
+    public class DependencySaveableData {
+        public string Identifier { get; internal set; }
+        public string Name { get; internal set; }
+        public string Steamid { get; internal set; }
+        public Version RequiredVersion { get; internal set; }
     }
 }

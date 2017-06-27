@@ -1,16 +1,16 @@
-﻿using DependencyChecker.SupportedFiles;
+﻿using DependencyChecker.Controllers;
+using DependencyChecker.Utils;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
 
 namespace DependencyChecker.UI {
 
     internal class Dialog_MissingAndOutDatedMods : Window {
-        public override Vector2 InitialSize { get { return new Vector2(350, 400); } }
+        public override Vector2 InitialSize { get { return new Vector2(500, 764); } }
 
-        private List<ModMetaData> workingMods = new List<ModMetaData>();
-        private Dictionary<string, DependenciesFile> dependencyFiles;
+        private List<DependencyHolder> dependencies = new List<DependencyHolder>();
+        private Vector2 scrollPosition;
 
         public override void DoWindowContents(Rect inRect) {
             GUI.BeginGroup(inRect);
@@ -19,6 +19,17 @@ namespace DependencyChecker.UI {
             string description = "There are active mods which depend on other mods that are either outdated, inactive or not installed.\n\nPlease resolve all issues before continuing.";
             Rect descRect = new Rect(0f, 0f, inRect.width, 90f);
             Widgets.Label(descRect, description);
+
+
+            Rect listRect = new Rect(0f, descRect.yMax + 5f, inRect.width, inRect.height - descRect.height - 38f - 5f);
+            DrawList(listRect);
+
+
+
+
+
+
+            GUI.EndGroup();
 
             // Need per mod:
             //      - mod name
@@ -36,26 +47,36 @@ namespace DependencyChecker.UI {
             //                  - Steam workshop link (if steam is available)
             //
             // Only allow user to continue and restart once all issues are resolved
+        }
 
-            GUI.EndGroup();
+        private void DrawList(Rect rect) {
+            float height = dependencies.Count * 34 + 300f;
+            Rect scrollOuter = rect;
+            Rect scrollInner = new Rect(0f, 26f, scrollOuter.width - 16f, height);
+            Rect content = scrollInner.ContractedBy(4f);
+            Widgets.DrawMenuSection(scrollOuter, true);
+            Widgets.BeginScrollView(rect, ref scrollPosition, scrollInner, true);
+
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(content);
+
+            foreach (var dep in dependencies) {
+                DrawDependencyItem(listing, dep);
+            }
+
+            listing.End();
+            Widgets.EndScrollView();
+        }
+
+        private void DrawDependencyItem(Listing_Standard listing, DependencyHolder dependency) {
+            listing.Label(dependency.mod.Name);
         }
 
         public override void PreOpen() {
             base.PreOpen();
-
-            dependencyFiles = new Dictionary<string, DependenciesFile>();
-            foreach (var mod in workingMods) {
-                DependenciesFile file = DependenciesFile.TryParseFile(mod.RootDir.FullName);
-                if (file != null) {
-                    dependencyFiles.Add(mod.Identifier, file);
-                }
-            }
         }
 
-        private void DetermineInitialSize() {
-        }
-
-        public Dialog_MissingAndOutDatedMods(List<ModMetaData> mods) {
+        public Dialog_MissingAndOutDatedMods(List<DependencyHolder> mods) {
             this.optionalTitle = "Dependency issues need to be resolved";
             this.absorbInputAroundWindow = true;
             this.closeOnClickedOutside = false;
@@ -68,19 +89,12 @@ namespace DependencyChecker.UI {
             this.layer = WindowLayer.Dialog;
             this.onlyOneOfTypeAllowed = true;
 
-            workingMods = mods;
+            dependencies = mods;
         }
 
-        public static void CreateDialog(List<string> identifiers) {
-            if (ModLister.AllInstalledMods == null) {
-                Log.Message("Installedmods is null");
-            }
-
-            CreateDialog(ModLister.AllInstalledMods.ToList().FindAll(m => identifiers.Contains(m.Identifier)));
-        }
-
-        public static void CreateDialog(List<ModMetaData> mods) {
-            Main.ScheduleDialog(new Dialog_MissingAndOutDatedMods(mods), true);
+        public static void CreateDialog(List<DependencyHolder> dependencies) {
+            Log.Message("Creating dialog with " + dependencies.Count + " mods");
+            CommonUtils.ScheduleDialog(new Dialog_MissingAndOutDatedMods(dependencies), true);
         }
     }
 }
