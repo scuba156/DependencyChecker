@@ -1,4 +1,4 @@
-﻿using DependencyChecker.Controllers;
+﻿using DependencyChecker.Dependencies;
 using DependencyChecker.Utils;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +9,7 @@ namespace DependencyChecker.UI {
     internal class Dialog_MissingAndOutDatedMods : Window {
         public override Vector2 InitialSize { get { return new Vector2(500, 764); } }
 
-        private List<DependencyHolder> dependencies = new List<DependencyHolder>();
+        private List<DependencyContainer> dependencies = new List<DependencyContainer>();
         private Vector2 scrollPosition;
 
         public override void DoWindowContents(Rect inRect) {
@@ -68,15 +68,15 @@ namespace DependencyChecker.UI {
             Widgets.EndScrollView();
         }
 
-        private void DrawDependencyItem(Listing_Standard listing, DependencyHolder dependency) {
-            listing.Label(dependency.mod.Name);
+        private void DrawDependencyItem(Listing_Standard listing, DependencyContainer dependency) {
+            listing.Label(dependency.RequiredMod.Identifier);
         }
 
         public override void PreOpen() {
             base.PreOpen();
         }
 
-        public Dialog_MissingAndOutDatedMods(List<DependencyHolder> mods) {
+        public Dialog_MissingAndOutDatedMods(List<DependencyContainer> mods) {
             this.optionalTitle = "Dependency issues need to be resolved";
             this.absorbInputAroundWindow = true;
             this.closeOnClickedOutside = false;
@@ -92,7 +92,7 @@ namespace DependencyChecker.UI {
             dependencies = mods;
         }
 
-        public static void CreateDialog(List<DependencyHolder> dependencies) {
+        public static void CreateDialog(List<DependencyContainer> dependencies) {
             Log.Message("Creating dialog with " + dependencies.Count + " mods");
             CommonUtils.ScheduleDialog(new Dialog_MissingAndOutDatedMods(dependencies), true);
         }

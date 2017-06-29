@@ -21,5 +21,11 @@ namespace DependencyChecker.Utils {
                 Find.WindowStack.Add(dialog);
             }, null, false, null);
         }
+
+        public static ModMetaData GetMod(string identifier, bool onlyIfActive = false) {
+            if (onlyIfActive)
+                return ModsConfig.ActiveModsInLoadOrder.First(mod => mod.Identifier == identifier);
+            return ModLister.AllInstalledMods.First(mod => mod.Identifier == identifier);
+        }
     }
 }

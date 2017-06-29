@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DependencyChecker.Components {
+namespace DependencyChecker.GameObjects {
 
     public class ComponentVersion : MonoBehaviour {
         public Version StoredVersion { get; set; }

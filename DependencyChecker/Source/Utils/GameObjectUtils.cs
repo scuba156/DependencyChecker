@@ -1,4 +1,4 @@
-﻿using DependencyChecker.Components;
+﻿using DependencyChecker.GameObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,11 @@ namespace DependencyChecker.Utils {
         /// <summary>
         /// Token that identifies our game object
         /// </summary>
-        private static readonly string GameObjectName = AssemblyUtils.CurrentAssemblyName + "Token";
+        private static readonly string UniqueToken = AssemblyUtils.CurrentAssemblyName + "Token";
 
         public static List<string> StoredModIdentifiers {
             get {
-                var gameObject = GetGameObject(GameObjectName);
+                var gameObject = GetGameObject();
                 foreach (Assembly assembly in AssemblyUtils.AllTypesOfExecutingAssemblies) {
                     var component = gameObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(ComponentModIdentifiers).Name));
                     if (component != null) {
@@ -28,7 +28,7 @@ namespace DependencyChecker.Utils {
             }
 
             set {
-                var gameObject = GetGameObject(GameObjectName);
+                var gameObject = GetGameObject();
                 gameObject.SetActive(true);
                 var component = gameObject.GetComponent<ComponentModIdentifiers>();
                 if (component == null) {
@@ -42,7 +42,7 @@ namespace DependencyChecker.Utils {
 
         public static Version StoredVersion {
             get {
-                var gameObject = GetGameObject(GameObjectName);
+                var gameObject = GetGameObject();
                 foreach (Assembly assembly in AssemblyUtils.AllTypesOfExecutingAssembliesExceptCurrent) {
                     var component = gameObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(ComponentVersion).Name));
                     if (component != null) {
@@ -53,7 +53,7 @@ namespace DependencyChecker.Utils {
             }
 
             set {
-                var gameObject = GetGameObject(GameObjectName);
+                var gameObject = GetGameObject();
                 gameObject.SetActive(true);
                 gameObject.AddComponent(typeof(ComponentVersion));
                 var component = gameObject.GetComponent<ComponentVersion>();
@@ -66,21 +66,16 @@ namespace DependencyChecker.Utils {
             }
         }
 
-        public static GameObject GetGameObject(string tokenName) {
-            GameObject result = GameObject.Find(tokenName);
+        public static GameObject GetGameObject() {
+            GameObject result = GameObject.Find(UniqueToken);
             if (result == null) {
-                Log.Message("Creating new game object");
-                return new GameObject(tokenName);
+                return new GameObject(UniqueToken);
             }
             return result;
         }
 
         public static void TryDestroyGameObject() {
-            TryDestroyGameObject(GameObjectName);
-        }
-
-        public static void TryDestroyGameObject(string gameObjectName) {
-            GameObject gameObject = GameObject.Find(gameObjectName);
+            GameObject gameObject = GameObject.Find(UniqueToken);
             if (gameObject == null)
                 UnityEngine.Object.Destroy(gameObject);
         }

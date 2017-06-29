@@ -1,4 +1,4 @@
-﻿using DependencyChecker.Controllers;
+﻿using DependencyChecker.Dependencies;
 using DependencyChecker.Utils;
 using System;
 using System.Collections.Generic;
@@ -8,13 +8,12 @@ using Verse;
 namespace DependencyChecker {
 
     /// <summary>
-    /// Our Entry Point
+    /// Main Entry Point
     ///
     /// This is where we find all loaded checker assemblies, mod related directories and execute on the latest version.
     /// </summary>
     [StaticConstructorOnStartup]
     public static class Main {
-
         /// <summary>
         /// Entry Point
         /// </summary>
@@ -40,9 +39,9 @@ namespace DependencyChecker {
             //TODO: remove this log message
             Log.Message(string.Format("We are executing on version {0}", AssemblyUtils.CurrentAssemblyVersion.ToString()));
 
-            var mods = GameObjectUtils.StoredModIdentifiers;
-            if (mods != null) {
-                DependencyController.Start(mods);
+            var relatedMods = GameObjectUtils.StoredModIdentifiers;
+            if (relatedMods != null) {
+                DependencyController.Start(relatedMods);
             }
 
             GameObjectUtils.TryDestroyGameObject();
@@ -65,7 +64,7 @@ namespace DependencyChecker {
                         relatedModIDs.Add(modContentPack.Identifier); // Add this mod to our list
                         if (assembly.GetName().Version > latestCheckerVersion)
                             latestCheckerVersion = assembly.GetName().Version; // This assembly version is newer
-                        break; // Already found a version of our assembly in this modpack
+                        break; // Already found a version of our assembly in this ModPack
                     }
                 }
             }
