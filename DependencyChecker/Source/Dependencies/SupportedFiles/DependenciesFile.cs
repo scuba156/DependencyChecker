@@ -8,10 +8,10 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
     public class DependenciesFile {
         public List<DependencyMetaData> Dependencies { get; private set; }
 
-        public const string Dir = "about";
+        public const string Directory = "about";
         public const string FileName = "dependencies.xml";
 
-        public static string RelativePath { get { return Path.Combine(Dir, FileName); } }
+        public static string RelativePath { get { return Path.Combine(Directory, FileName); } }
 
         internal DependenciesFile(XDocument doc) {
             Dependencies = new List<DependencyMetaData>();
@@ -32,7 +32,6 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
         }
 
         private void ParseXmlDocument(XDocument doc) {
-            if (doc.Root == null) throw new Exception("Missing root node");
             if (doc.Element("Dependencies") != null) {
                 foreach (var dependenciesElement in doc.Element("Dependencies").Elements("Dependency")) {
                     DependencyMetaData dependency = new DependencyMetaData();
@@ -65,9 +64,6 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
                     }
                 }
             }
-
-
-            
         }
     }
 }

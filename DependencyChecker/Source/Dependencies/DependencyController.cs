@@ -15,12 +15,10 @@ namespace DependencyChecker.Dependencies {
 
 
         public static void Start(List<string> mods) {
-            Log.Message("Starting with " + mods.Count + "mods");
-
             ParseRelevantModFiles(mods);
 
             if (Dependencies.Count > 0) {
-                Dialog_MissingAndOutDatedMods.CreateDialog(Dependencies);
+                Dialog_MissingAndOutDatedMods.CreateDialog(Dependencies.FindAll(d=>d.Issue != IssueType.None));
             }
         }
 
@@ -54,14 +52,16 @@ namespace DependencyChecker.Dependencies {
             }
         }
 
-        static void AddDependency(DependencyMetaData dependency, ModMetaData dependant) {
-            DependencyContainer existing = Dependencies.Find(d => d.RequiredMod == dependency);
+        static void AddDependency(DependencyMetaData dependency, ModMetaData dependent) {
+            DependencyContainer existing = Dependencies.Find(d => d.RequiredMod.Identifier == dependency.Identifier);
             if (existing == null) {
                 DependencyContainer newDependency = new DependencyContainer(dependency);
-                newDependency.DepentantMods.Add(dependant);
+                newDependency.DepentantMods.Add(dependent);
                 Dependencies.Add(newDependency);
             } else {
-                existing.DepentantMods.Add(dependant);
+                if (!existing.DepentantMods.Contains(dependent)) {
+                    existing.DepentantMods.Add(dependent);
+                }
             }
         }
     }

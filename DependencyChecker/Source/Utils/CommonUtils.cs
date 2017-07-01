@@ -17,6 +17,7 @@ namespace DependencyChecker.Utils {
                         if (!Find.WindowStack.TryRemove(win))
                             Log.Message(AssemblyUtils.CurrentAssemblyName + " failed to remove window of type" + win.GetType().Name);
                     }
+                    EditWindow_Log.wantsToOpen = false;
                 }
                 Find.WindowStack.Add(dialog);
             }, null, false, null);
