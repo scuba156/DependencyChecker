@@ -48,11 +48,12 @@ namespace DependencyChecker.Dependencies {
                 if (hugslibVersion.RequiredLibraryVersion <= HugsLibVersionFile.A16Version) {
                     steamID = HugsLibVersionFile.SteamIDA16;
                 }
-                AddDependency(new DependencyMetaData(HugsLibVersionFile.Identifier, steamID, hugslibVersion.RequiredLibraryVersion), mod);
+                AddDependency(new DependencyMetaData(HugsLibVersionFile.Identifier, steamID, "HugsLib", hugslibVersion.RequiredLibraryVersion), mod);
             }
         }
 
         static void AddDependency(DependencyMetaData dependency, ModMetaData dependent) {
+            Log.Message("working with " + dependency.FriendlyName);
             DependencyContainer existing = Dependencies.Find(d => d.RequiredMod.Identifier == dependency.Identifier);
             if (existing == null) {
                 DependencyContainer newDependency = new DependencyContainer(dependency);
@@ -60,7 +61,13 @@ namespace DependencyChecker.Dependencies {
                 Dependencies.Add(newDependency);
             } else {
                 if (!existing.DepentantMods.Contains(dependent)) {
-                    existing.DepentantMods.Add(dependent);
+                    if (existing.RequiredMod.FriendlyName.NullOrEmpty()) {
+                        existing.RequiredMod.FriendlyName = dependency.FriendlyName;
+                    }
+                    if (existing.RequiredMod.SteamID.NullOrEmpty()) {
+                        existing.RequiredMod.SteamID = dependency.SteamID;
+                        existing.DepentantMods.Add(dependent);
+                    }
                 }
             }
         }

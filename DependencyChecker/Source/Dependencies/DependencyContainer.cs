@@ -12,6 +12,8 @@ namespace DependencyChecker.Dependencies {
         public List<ModMetaData> DepentantMods { get; private set; }
         public IssueType Issue { get; private set; }
         public bool SetActive { get; set; }
+        public bool FixIssue { get; set; }
+        public bool DisableDependends { get; set; }
 
         public DependencyContainer(DependencyMetaData requiredMod) {
             RequiredMod = requiredMod;

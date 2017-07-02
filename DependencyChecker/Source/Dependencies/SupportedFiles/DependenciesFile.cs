@@ -54,6 +54,12 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
 
                                 break;
 
+                            case "friendlyname":
+                                if (element.Value != null)
+                                    dependency.FriendlyName = element.Value;
+                                Verse.Log.Message("Found " + element.Value);
+                                break;
+
                             default:
                                 //Log.Message(string.Format("ignoring '{0}' as it is not a valid dependency element", element.Name.LocalName));
                                 break;

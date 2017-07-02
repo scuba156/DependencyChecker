@@ -29,8 +29,8 @@ namespace DependencyChecker.UI {
             AllDependencies = dependencies;
         }
 
-        public override Vector2 InitialSize { get { return new Vector2(500, 700); } }
-        private Vector2 ItemSize { get { return new Vector2(400f, 120f); } }
+        public override Vector2 InitialSize { get { return new Vector2(500, 600); } }
+        private Vector2 ItemSize { get { return new Vector2(400f, 110f); } }
 
         public static void CreateDialog(List<DependencyContainer> dependencies) {
             CommonUtils.ScheduleDialog(new Dialog_MissingAndOutDatedMods(dependencies), true);
@@ -49,11 +49,10 @@ namespace DependencyChecker.UI {
             Widgets.Label(descRect, description);
 
             // Dependency list
-            Rect listRect = new Rect(7f, descRect.yMax + 5f, inRect.width, inRect.height - descRect.height - 38f - 5f);
+            Rect listRect = new Rect(7f, descRect.yMax + 5f, inRect.width, inRect.height - descRect.height - 38f - 10f);
             DrawList(listRect);
 
             GUI.EndGroup();
-
 
             // Need per mod dependency
             //      - list of dependant mods
@@ -71,6 +70,11 @@ namespace DependencyChecker.UI {
             //      - mod name
             //      - button to disable mod
             // Only allow user to continue and restart once all issues are resolved
+        }
+
+        public override void PreClose() {
+            base.PreClose();
+            //TODO: Resolve possible issues
         }
 
         public override void PreOpen() {
@@ -107,35 +111,48 @@ namespace DependencyChecker.UI {
 
             // Title
             Text.Font = GameFont.Medium;
-            Rect titleRect = new Rect(contentRect.xMin, contentRect.yMin, contentRect.width, 32f);
-            Widgets.Label(titleRect, dependency.RequiredMod.Identifier);
-            Widgets.DrawLineHorizontal(titleRect.xMin, titleRect.yMax, Text.CalcSize(dependency.RequiredMod.Identifier).x + 10f);
-            titleRect.y += 30f;
-            Text.Font = GameFont.Small;
-            Widgets.Label(titleRect, dependency.Issue.ToString());
+            string depTitle = dependency.RequiredMod.FriendlyName;
+            if (depTitle.NullOrEmpty()) {
+                depTitle = dependency.RequiredMod.Identifier;
+            }
 
-            // Required version
-            Text.Font = GameFont.Tiny;
             if (dependency.RequiredMod.RequiredVersion != null) {
-                Text.Anchor = TextAnchor.UpperRight;
-                Rect requiredVersionRect = new Rect(contentRect.xMax - 90f, contentRect.yMin, 90f, 23f);
-                Widgets.Label(requiredVersionRect, "Requires v" + dependency.RequiredMod.RequiredVersion);
+                depTitle += " v";
             }
 
-            // Required by
-            Text.Anchor = origAnchor;
-            string s = "Required by:";
-            foreach (var item in dependency.DepentantMods) {
-                s += " " + item.Name + ",";
+            float titleWidth = Text.CalcSize(depTitle).x;
+
+            Rect titleRect = new Rect(contentRect.xMin, contentRect.yMin, titleWidth, 32f);
+            Widgets.Label(titleRect, depTitle);
+            Widgets.DrawLineHorizontal(titleRect.xMin, titleRect.yMax, titleWidth + 10f);
+            Text.Font = GameFont.Small;
+
+            // Version
+            if (dependency.RequiredMod.RequiredVersion != null) {
+                Rect versionRect = new Rect(titleRect.xMax + 2f, titleRect.yMax - 25f, 60f, 23f);
+                Widgets.Label(versionRect, dependency.RequiredMod.RequiredVersion.ToString());
             }
 
-            Rect dependentsRect = new Rect(contentRect.xMin, contentRect.yMax - 23f, contentRect.width, 23f);
-            Widgets.Label(dependentsRect, s.TrimEnd(','));
+            Rect issueRect = new Rect(titleRect);
+            issueRect.y += 32f;
+            issueRect.width = 90f;
+            Widgets.Label(issueRect, dependency.Issue.ToString());
+
+            Rect dependentsRect = new Rect(contentRect.xMin, contentRect.yMax - 32f, 80f, 32f);
+            Widgets.ButtonText(dependentsRect, "Dependents");
+            //Widgets.Label(dependentsRect, s.TrimEnd(','));
+
+            // Fix Issue
+            bool chosen = dependency.DisableDependends;
+            Text.Anchor = TextAnchor.LowerRight;
+            Text.Font = GameFont.Tiny;
+            Rect disableDependents = new Rect(contentRect.xMax - 140f, contentRect.yMax - 21f, 140f, 22f);
+            Widgets.CheckboxLabeled(disableDependents, "Disable dependents", ref chosen);
+            dependency.DisableDependends = chosen;
 
             Text.Font = origFont;
             Text.Anchor = origAnchor;
         }
-
         private void DrawList(Rect rect) {
             float height = AllDependencies.Count * 34 + 300f;
             Rect scrollOuter = rect;
