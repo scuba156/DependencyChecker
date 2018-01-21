@@ -10,8 +10,8 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
         public const string VersionFileName = "Version.xml";
 
         public static readonly string Identifier = "HugsLib";
-        public static readonly string SteamIDA16 = "932443910";
-        public static readonly string SteamIDA17 = "818773962";
+        public static readonly ulong SteamIDA16 = 932443910;
+        public static readonly ulong SteamIDA17 = 818773962;
         public static readonly Version A16Version = new Version(2, 4, 5);
 
         private HugsLibVersionFile(XDocument doc) {

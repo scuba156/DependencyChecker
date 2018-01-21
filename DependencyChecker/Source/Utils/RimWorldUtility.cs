@@ -4,7 +4,7 @@ using Verse;
 
 namespace DependencyChecker.Utils {
 
-    internal static class CommonUtils {
+    internal static class RimWorldUtility {
 
         /// <summary>
         /// Schedules a dialog to display
@@ -15,18 +15,12 @@ namespace DependencyChecker.Utils {
                     List<Window> toRemove = Find.WindowStack.Windows.ToList().FindAll(win => win.layer != WindowLayer.GameUI).ListFullCopy();
                     foreach (var win in toRemove) {
                         if (!Find.WindowStack.TryRemove(win))
-                            Log.Message(AssemblyUtils.CurrentAssemblyName + " failed to remove window of type" + win.GetType().Name);
+                            Log.Message(AssemblyUtility.CurrentAssemblyName + " failed to remove window of type" + win.GetType().Name);
                     }
                     EditWindow_Log.wantsToOpen = false;
                 }
                 Find.WindowStack.Add(dialog);
-            }, null, false, null);
-        }
-
-        public static ModMetaData GetMod(string identifier, bool onlyIfActive = false) {
-            if (onlyIfActive)
-                return ModsConfig.ActiveModsInLoadOrder.First(mod => mod.Identifier == identifier);
-            return ModLister.AllInstalledMods.First(mod => mod.Identifier == identifier);
+            }, null, true, null);
         }
     }
 }

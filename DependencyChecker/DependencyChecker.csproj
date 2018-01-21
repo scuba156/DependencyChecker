@@ -16,7 +16,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Output\DependencyChecker\Assemblies\</OutputPath>
+    <OutputPath>Output\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>Output\DependencyChecker\Assemblies\</OutputPath>
+    <OutputPath>Output\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,6 +32,10 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -49,24 +53,24 @@
     <Compile Include="Source\Dependencies\DependencyContainer.cs" />
     <Compile Include="Source\Dependencies\DependencyMetaData.cs" />
     <Compile Include="Source\Dependencies\SupportedFiles\HugsLibVersionFile.cs" />
-    <Compile Include="Source\GameObjects\Components.cs" />
-    <Compile Include="Source\Controllers\ModController.cs" />
-    <Compile Include="Source\Utils\AssemblyUtils.cs" />
-    <Compile Include="Source\Utils\CommonUtils.cs" />
+    <Compile Include="Source\UI\Dialog_RequiredBy.cs" />
+    <Compile Include="Source\Utils\AssemblyUtility.cs" />
+    <Compile Include="Source\Utils\ModUtility.cs" />
+    <Compile Include="Source\Utils\RimWorldUtility.cs" />
     <Compile Include="Source\Dependencies\DependencyController.cs" />
     <Compile Include="Source\Dependencies\SupportedFiles\DependenciesFile.cs" />
     <Compile Include="Source\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\UI\Dialog_MissingAndOutDatedMods.cs" />
+    <Compile Include="Source\UI\Dialog_DependencyChecker.cs" />
     <Compile Include="Source\Utils\GameObjectUtils.cs" />
+    <Compile Include="Source\Utils\LanguageUtility.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Output\DependencyChecker\Assemblies\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Output\DependencyChecker\About\About.xml" />
-    <Content Include="Resources\Languages\English\keyed\English.xml" />
-    <Content Include="Resources\Languages\English\LanguageInfo.xml" />
+    <EmbeddedResource Include="Languages\English\keyed\English.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Languages\English\LanguageInfo.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

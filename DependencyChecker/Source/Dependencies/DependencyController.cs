@@ -1,30 +1,46 @@
 ﻿using DependencyChecker.Dependencies.SupportedFiles;
 using DependencyChecker.UI;
 using DependencyChecker.Utils;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Verse;
 
 namespace DependencyChecker.Dependencies {
 
-
     public static class DependencyController {
-
-        static List<DependencyContainer> Dependencies = new List<DependencyContainer>();
-
+        public static List<DependencyContainer> Dependencies { get; set; }
 
         public static void Start(List<string> mods) {
             ParseRelevantModFiles(mods);
 
             if (Dependencies.Count > 0) {
-                Dialog_MissingAndOutDatedMods.CreateDialog(Dependencies.FindAll(d=>d.Issue != IssueType.None));
+                LanguageUtility.LoadAllLanguages();
+                RimWorldUtility.ScheduleDialog(new Dialog_DependencyChecker(Dependencies.FindAll(d => d.CurrentStatus != StatusType.Enabled)), true);
             }
         }
 
-        static void ParseRelevantModFiles(List<string> relevantMods) {
+        private static void AddDependency(DependencyMetaData dependency, ModMetaData dependent) {
+            DependencyContainer existing = Dependencies.Find(d => d.RequiredMod.Name == dependency.Name);
+            if (existing == null) {
+                DependencyContainer newDependency = new DependencyContainer(dependency);
+                newDependency.DependentMods.Add(dependent);
+                Dependencies.Add(newDependency);
+            } else {
+                if (!existing.DependentMods.Contains(dependent)) {
+                    if (existing.RequiredMod.FriendlyName.NullOrEmpty()) {
+                        existing.RequiredMod.FriendlyName = dependency.FriendlyName;
+                    }
+                    if (existing.RequiredMod.SteamID > 0) {
+                        existing.RequiredMod.SteamID = dependency.SteamID;
+                    }
+                    existing.DependentMods.Add(dependent);
+                }
+            }
+        }
+
+        private static void ParseRelevantModFiles(List<string> relevantMods) {
+            Dependencies = new List<DependencyContainer>();
             foreach (var identifier in relevantMods) {
-                var mod = CommonUtils.GetMod(identifier);
+                var mod = ModUtility.GetModByIdentifier(identifier);
                 if (mod != null) {
                     ReadHugsLibVersionFile(mod);
                     ReadDependencyFile(mod);
@@ -32,7 +48,7 @@ namespace DependencyChecker.Dependencies {
             }
         }
 
-        static void ReadDependencyFile(ModMetaData mod) {
+        private static void ReadDependencyFile(ModMetaData mod) {
             DependenciesFile file = DependenciesFile.TryParseFile(mod.RootDir.FullName);
             if (file != null) {
                 foreach (var dependency in file.Dependencies) {
@@ -41,34 +57,14 @@ namespace DependencyChecker.Dependencies {
             }
         }
 
-        static void ReadHugsLibVersionFile(ModMetaData mod) {
+        private static void ReadHugsLibVersionFile(ModMetaData mod) {
             HugsLibVersionFile hugslibVersion = HugsLibVersionFile.TryParseVersionFile(mod.RootDir.FullName);
             if (hugslibVersion != null) {
-                string steamID = HugsLibVersionFile.SteamIDA17;
+                ulong hugslibID = HugsLibVersionFile.SteamIDA17;
                 if (hugslibVersion.RequiredLibraryVersion <= HugsLibVersionFile.A16Version) {
-                    steamID = HugsLibVersionFile.SteamIDA16;
+                    hugslibID = HugsLibVersionFile.SteamIDA16;
                 }
-                AddDependency(new DependencyMetaData(HugsLibVersionFile.Identifier, steamID, "HugsLib", hugslibVersion.RequiredLibraryVersion), mod);
-            }
-        }
-
-        static void AddDependency(DependencyMetaData dependency, ModMetaData dependent) {
-            Log.Message("working with " + dependency.FriendlyName);
-            DependencyContainer existing = Dependencies.Find(d => d.RequiredMod.Identifier == dependency.Identifier);
-            if (existing == null) {
-                DependencyContainer newDependency = new DependencyContainer(dependency);
-                newDependency.DepentantMods.Add(dependent);
-                Dependencies.Add(newDependency);
-            } else {
-                if (!existing.DepentantMods.Contains(dependent)) {
-                    if (existing.RequiredMod.FriendlyName.NullOrEmpty()) {
-                        existing.RequiredMod.FriendlyName = dependency.FriendlyName;
-                    }
-                    if (existing.RequiredMod.SteamID.NullOrEmpty()) {
-                        existing.RequiredMod.SteamID = dependency.SteamID;
-                        existing.DepentantMods.Add(dependent);
-                    }
-                }
+                AddDependency(new DependencyMetaData(HugsLibVersionFile.Identifier, hugslibID, "HugsLib", hugslibVersion.RequiredLibraryVersion), mod);
             }
         }
     }

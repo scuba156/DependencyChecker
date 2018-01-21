@@ -19,16 +19,16 @@ namespace DependencyChecker {
         /// </summary>
         static Main() {
             try {
-                var latestVersion = GameObjectUtils.StoredVersion; // Try and get our latest checker version GameObject
+                var latestVersion = GameObjectUtility.StoredVersion; // Try and get our latest checker version GameObject
                 if (latestVersion == null) { // No GameObject was found
                     latestVersion = Init(); // This is the first Instance to load
                 }
-                if (AssemblyUtils.CurrentAssemblyVersion >= latestVersion) { // compare version
+                if (AssemblyUtility.CurrentAssemblyVersion >= latestVersion) { // compare version
                     Execute(); // This assembly is the latest version found
                 }
             }
             catch (Exception e) { // An exception occurred, output the version to help with debugging
-                Log.Error(string.Format("An exception was caused by {0} assembly version {1}. Exception was: {2}", AssemblyUtils.CurrentAssemblyName, AssemblyUtils.CurrentAssemblyVersion.ToString(), e));
+                Log.Error(string.Format("An exception was caused by {0} assembly version {1}. Exception was: {2}", AssemblyUtility.CurrentAssemblyName, AssemblyUtility.CurrentAssemblyVersion.ToString(), e));
             }
         }
 
@@ -37,14 +37,14 @@ namespace DependencyChecker {
         /// </summary>
         private static void Execute() { // This is not version specific
             //TODO: remove this log message
-            Log.Message(string.Format("We are executing on version {0}", AssemblyUtils.CurrentAssemblyVersion.ToString()));
+            Log.Message(string.Format("We are executing on version {0}", AssemblyUtility.CurrentAssemblyVersion.ToString()));
 
-            var relatedMods = GameObjectUtils.StoredModIdentifiers;
+            var relatedMods = GameObjectUtility.StoredModIdentifiers;
             if (relatedMods != null) {
                 DependencyController.Start(relatedMods);
             }
 
-            GameObjectUtils.TryDestroyGameObject();
+            GameObjectUtility.TryDestroyGameObject();
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace DependencyChecker {
             }
 
             // Create our GameObjects to be accessed by another instance
-            GameObjectUtils.StoredVersion = latestCheckerVersion;
-            GameObjectUtils.StoredModIdentifiers = relatedModIDs;
+            GameObjectUtility.StoredVersion = latestCheckerVersion;
+            GameObjectUtility.StoredModIdentifiers = relatedModIDs;
 
             return latestCheckerVersion; // Return the latest version so we know if we should execute on this instance
         }

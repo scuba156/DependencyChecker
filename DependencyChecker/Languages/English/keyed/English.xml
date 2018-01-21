@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <Disable>Disable</Disable>
+  <Disabled>Disabled</Disabled>
+  <Enable>Enable</Enable>
+  <Enabled>Enabled</Enabled>
+  <Find>Websites</Find>
+  <FindOn>Find on {0}</FindOn>
+  <FixButton>Fix</FixButton>
+  <Github>GitHub</Github>
+  <IgnoreButton>Ignore</IgnoreButton>
+  <LudeonForums>Ludeon Forums</LudeonForums>
+  <MainDescription>One or more enabled mods uses features from other mods that are either disabled, not installed or requires a different version to the one you have enabled.\n\nSome mods may not work correctly until all issues are fixed.</MainDescription>
+  <MainTitle>Mod Issues Found</MainTitle>
+  <ModMenuButton>Mod Menu</ModMenuButton>
+  <OpenModURL>Open Mod URL</OpenModURL>
+  <OpenOnSteam>Open Steam Page</OpenOnSteam>
+  <Outdated>Outdated</Outdated>
+  <RestartButton>Restart</RestartButton>
+  <RequiredCount>Required by {0} mod(s)</RequiredCount>
+  <Steam>Steam</Steam>
+  <Subscribe>Subscribe</Subscribe>
+  <Subscribed>Subscribed</Subscribed>
+  <TooltipDependentsCount>Mods that require {0}:\n\n{1}\n\nClick to disable the above mods</TooltipDependentsCount>
+  <Updated>Updated</Updated>
+</LanguageData>

@@ -1,24 +1,22 @@
-﻿using DependencyChecker.GameObjects;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using Verse;
 
 namespace DependencyChecker.Utils {
 
-    public static class GameObjectUtils {
+    public static class GameObjectUtility {
 
         /// <summary>
         /// Token that identifies our game object
         /// </summary>
-        private static readonly string UniqueToken = AssemblyUtils.CurrentAssemblyName + "Token";
+        private static readonly string GeneratedUniqueToken = AssemblyUtility.CurrentAssemblyName + "Token";
 
         public static List<string> StoredModIdentifiers {
             get {
                 var gameObject = GetGameObject();
-                foreach (Assembly assembly in AssemblyUtils.AllTypesOfExecutingAssemblies) {
+                foreach (Assembly assembly in AssemblyUtility.AllTypesOfExecutingAssemblies) {
                     var component = gameObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(ComponentModIdentifiers).Name));
                     if (component != null) {
                         return (List<string>)component.GetType().GetProperty("StoredModIdentifiers").GetValue(component, null);
@@ -43,7 +41,7 @@ namespace DependencyChecker.Utils {
         public static Version StoredVersion {
             get {
                 var gameObject = GetGameObject();
-                foreach (Assembly assembly in AssemblyUtils.AllTypesOfExecutingAssembliesExceptCurrent) {
+                foreach (Assembly assembly in AssemblyUtility.AllTypesOfExecutingAssembliesExceptCurrent) {
                     var component = gameObject.GetComponent(assembly.GetTypes().First(type => type.Name == typeof(ComponentVersion).Name));
                     if (component != null) {
                         return (Version)component.GetType().GetProperty("StoredVersion").GetValue(component, null);
@@ -67,17 +65,25 @@ namespace DependencyChecker.Utils {
         }
 
         public static GameObject GetGameObject() {
-            GameObject result = GameObject.Find(UniqueToken);
+            GameObject result = GameObject.Find(GeneratedUniqueToken);
             if (result == null) {
-                return new GameObject(UniqueToken);
+                return new GameObject(GeneratedUniqueToken);
             }
             return result;
         }
 
         public static void TryDestroyGameObject() {
-            GameObject gameObject = GameObject.Find(UniqueToken);
+            GameObject gameObject = GameObject.Find(GeneratedUniqueToken);
             if (gameObject == null)
                 UnityEngine.Object.Destroy(gameObject);
         }
+    }
+
+    public class ComponentModIdentifiers : MonoBehaviour {
+        public List<string> StoredModIdentifiers { get; set; }
+    }
+
+    public class ComponentVersion : MonoBehaviour {
+        public Version StoredVersion { get; set; }
     }
 }

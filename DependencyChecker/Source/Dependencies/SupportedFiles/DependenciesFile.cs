@@ -37,35 +37,34 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
                     DependencyMetaData dependency = new DependencyMetaData();
 
                     foreach (var element in dependenciesElement.Elements()) {
-                        switch (element.Name.LocalName.ToLower()) {
-                            case "identifier":
-                                if (element.Value != null)
-                                    dependency.Identifier = element.Value;
-                                break;
+                        if (!string.IsNullOrEmpty(element.Value)) {
+                            switch (element.Name.LocalName.ToLower()) {
+                                case "name":
+                                        dependency.Name = element.Value;
+                                    break;
 
-                            case "requiredversion":
-                                if (element.Value != null && element.Value != string.Empty)
-                                    dependency.RequiredVersion = new Version(element.Value);
-                                break;
+                                case "requiredversion":
+                                        dependency.RequiredVersion = new Version(element.Value);
+                                    break;
 
-                            case "steamid":
-                                if (element.Value != null)
-                                    dependency.SteamID = element.Value;
+                                case "steamid":
+                                    if (ulong.TryParse(element.Value, out ulong parsedValue)) {
+                                        dependency.SteamID = parsedValue;
+                                    }
+                                    break;
 
-                                break;
+                                case "friendlyname":
+                                        dependency.FriendlyName = element.Value;
+                                    break;
 
-                            case "friendlyname":
-                                if (element.Value != null)
-                                    dependency.FriendlyName = element.Value;
-                                Verse.Log.Message("Found " + element.Value);
-                                break;
-
-                            default:
-                                //Log.Message(string.Format("ignoring '{0}' as it is not a valid dependency element", element.Name.LocalName));
-                                break;
+                                default:
+                                    //Log.Message(string.Format("ignoring '{0}' as it is not a valid dependency element", element.Name.LocalName));
+                                    break;
+                            }
                         }
                     }
-                    if (dependency.Identifier != string.Empty) {
+                    if (dependency.Name != string.Empty) {
+                        dependency.RelatedModMetaData = Utils.ModUtility.GetModByName(dependency.Name);
                         Dependencies.Add(dependency);
                     }
                 }

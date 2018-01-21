@@ -1,49 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Verse;
 
 namespace DependencyChecker.Dependencies {
-    public enum IssueType { Missing, Inactive, Outdated, None }
+
+    public enum StatusType { Enabled, DependentsDisabled, RequiredDisabled, RequiredMissing }
 
     public class DependencyContainer {
-        public DependencyMetaData RequiredMod { get; private set; }
-        public List<ModMetaData> DepentantMods { get; private set; }
-        public IssueType Issue { get; private set; }
-        public bool SetActive { get; set; }
-        public bool FixIssue { get; set; }
-        public bool DisableDependends { get; set; }
-
         public DependencyContainer(DependencyMetaData requiredMod) {
             RequiredMod = requiredMod;
-            DepentantMods = new List<ModMetaData>();
+            DependentMods = new List<ModMetaData>();
+            UpdateStatus();
+        }
 
-            //TODO: more work needed
-
-            var mod = LoadedModManager.RunningMods.ToList().Find(m => m.Name.ToLower() == requiredMod.Identifier.ToLower());
-            if (mod != null) {
-                Issue = IssueType.None;
-            } else {
-
-                //foreach (var item in ModLister.AllInstalledMods) {
-                //    Log.Message("Mod " + item.Identifier + ":" + item.Name);
-                //}
-
-
-                var meta = ModLister.AllInstalledMods.ToList().Find(m => m.Identifier.ToLower() == requiredMod.Identifier.ToLower() | m.Identifier == requiredMod.SteamID);
-                if (meta != null) {
-                    //TODO: find assembly and compare version
-                    Issue = IssueType.Inactive;
+        public void UpdateStatus() {
+            if (CurrentStatus != StatusType.DependentsDisabled) {
+                if (RequiredMod.RelatedModMetaData == null) {
+                    CurrentStatus = StatusType.RequiredMissing;
                 } else {
-                    Issue = IssueType.Missing;
+                    if (!RequiredMod.RelatedModMetaData.Active) {
+                        CurrentStatus = StatusType.RequiredDisabled;
+                    } else {
+                        CurrentStatus = StatusType.Enabled;
+                    }
                 }
             }
         }
 
+        public List<ModMetaData> DependentMods { get; private set; }
+        public StatusType CurrentStatus { get; set; }
+        public bool IssueResolved { get; set; }
+        public DependencyMetaData RequiredMod { get; private set; }
+
         public void AddDependent(ModMetaData mod) {
-            if (!DepentantMods.Contains(mod)) {
-                DepentantMods.Add(mod);
+            if (!DependentMods.Contains(mod)) {
+                DependentMods.Add(mod);
             }
         }
     }
