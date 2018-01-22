@@ -9,10 +9,13 @@ namespace DependencyChecker.Utils {
     public static class GameObjectUtility {
 
         /// <summary>
-        /// Token that identifies our game object
+        /// Unique token that identifies our game object
         /// </summary>
         private static readonly string GeneratedUniqueToken = AssemblyUtility.CurrentAssemblyName + "Token";
 
+        /// <summary>
+        /// Uses our GameObject to store a list of mod identifiers
+        /// </summary>
         public static List<string> StoredModIdentifiers {
             get {
                 var gameObject = GetGameObject();
@@ -38,6 +41,9 @@ namespace DependencyChecker.Utils {
             }
         }
 
+        /// <summary>
+        /// Uses our GameObject to store a version number
+        /// </summary>
         public static Version StoredVersion {
             get {
                 var gameObject = GetGameObject();
@@ -64,6 +70,10 @@ namespace DependencyChecker.Utils {
             }
         }
 
+        /// <summary>
+        /// Gets any GameObject stored using our unique token, or creates a new one if none exists
+        /// </summary>
+        /// <returns>A Unity.GameObject unique to this assembly</returns>
         public static GameObject GetGameObject() {
             GameObject result = GameObject.Find(GeneratedUniqueToken);
             if (result == null) {
@@ -72,17 +82,27 @@ namespace DependencyChecker.Utils {
             return result;
         }
 
+        /// <summary>
+        /// Removes our GameObject from memory
+        /// </summary>
         public static void TryDestroyGameObject() {
             GameObject gameObject = GameObject.Find(GeneratedUniqueToken);
-            if (gameObject == null)
+            if (gameObject != null) {
                 UnityEngine.Object.Destroy(gameObject);
+            }
         }
     }
 
+    /// <summary>
+    /// Component for mod identifiers that gets stored within a GameObject
+    /// </summary>
     public class ComponentModIdentifiers : MonoBehaviour {
         public List<string> StoredModIdentifiers { get; set; }
     }
 
+    /// <summary>
+    /// Component for mod identifiers that gets stored within a GameObject
+    /// </summary>
     public class ComponentVersion : MonoBehaviour {
         public Version StoredVersion { get; set; }
     }

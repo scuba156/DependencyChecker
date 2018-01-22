@@ -5,29 +5,31 @@ using System.Xml.Linq;
 
 namespace DependencyChecker.Dependencies.SupportedFiles {
 
-    public class DependenciesFile {
-        public List<DependencyMetaData> Dependencies { get; private set; }
+    /// <summary>
+    /// Handles a dependencies.xml file
+    /// </summary>
+    internal class DependenciesFile {
+        internal List<DependencyMetaData> Dependencies { get; private set; }
 
-        public const string Directory = "about";
-        public const string FileName = "dependencies.xml";
+        internal const string Directory = "about";
+        internal const string FileName = "dependencies.xml";
 
-        public static string RelativePath { get { return Path.Combine(Directory, FileName); } }
+        internal static string RelativePath { get { return Path.Combine(Directory, FileName); } }
 
         internal DependenciesFile(XDocument doc) {
             Dependencies = new List<DependencyMetaData>();
             ParseXmlDocument(doc);
         }
 
-        public static DependenciesFile TryParseFile(string modRootDir) {
+        internal static DependenciesFile TryParseFile(string modRootDir) {
             string filePath = Path.Combine(modRootDir, RelativePath);
             if (!File.Exists(filePath)) return null;
             try {
                 XDocument doc = XDocument.Load(filePath);
                 return new DependenciesFile(doc);
             }
-            catch (Exception e) {
-                throw e;
-                //Log.Error("[DependencyChecker] Exception while parsing dependencies file at path: " + filePath + " Exception was: " + e);
+            catch (Exception) {
+                throw;
             }
         }
 
@@ -63,7 +65,7 @@ namespace DependencyChecker.Dependencies.SupportedFiles {
                             }
                         }
                     }
-                    if (dependency.Name != string.Empty) {
+                    if (!string.IsNullOrEmpty(dependency.Name)) {
                         dependency.RelatedModMetaData = Utils.ModUtility.GetModByName(dependency.Name);
                         Dependencies.Add(dependency);
                     }

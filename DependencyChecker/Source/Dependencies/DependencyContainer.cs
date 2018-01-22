@@ -1,19 +1,25 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Verse;
 
 namespace DependencyChecker.Dependencies {
 
-    public enum StatusType { Enabled, DependentsDisabled, RequiredDisabled, RequiredMissing }
+    internal enum StatusType { Enabled, DependentsDisabled, RequiredDisabled, RequiredMissing }
 
-    public class DependencyContainer {
-        public DependencyContainer(DependencyMetaData requiredMod) {
+    /// <summary>
+    /// A class to hold a dependency, mods that depend on it, and what the issue is
+    /// </summary>
+    internal class DependencyContainer {
+
+        internal DependencyContainer(DependencyMetaData requiredMod) {
             RequiredMod = requiredMod;
             DependentMods = new List<ModMetaData>();
             UpdateStatus();
         }
 
-        public void UpdateStatus() {
+        /// <summary>
+        /// Determines the current status of the RequiredMod
+        /// </summary>
+        internal void UpdateStatus() {
             if (CurrentStatus != StatusType.DependentsDisabled) {
                 if (RequiredMod.RelatedModMetaData == null) {
                     CurrentStatus = StatusType.RequiredMissing;
@@ -27,12 +33,16 @@ namespace DependencyChecker.Dependencies {
             }
         }
 
-        public List<ModMetaData> DependentMods { get; private set; }
-        public StatusType CurrentStatus { get; set; }
-        public bool IssueResolved { get; set; }
-        public DependencyMetaData RequiredMod { get; private set; }
+        internal List<ModMetaData> DependentMods { get; private set; }
+        internal StatusType CurrentStatus { get; set; }
+        internal bool IssueResolved { get; set; }
+        internal DependencyMetaData RequiredMod { get; private set; }
 
-        public void AddDependent(ModMetaData mod) {
+        /// <summary>
+        /// Add a mod that depends on RequiredMod to the current list
+        /// </summary>
+        /// <param name="mod"></param>
+        internal void AddDependent(ModMetaData mod) {
             if (!DependentMods.Contains(mod)) {
                 DependentMods.Add(mod);
             }

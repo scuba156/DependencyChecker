@@ -7,10 +7,20 @@ using Verse;
 
 namespace DependencyChecker.Utils {
 
-    public static class LanguageUtility {
-        public static readonly string LanguageDirectory = Path.Combine(Application.temporaryCachePath, "DC");
+    /// <summary>
+    /// A utility to help handle embedded RimWorld language files
+    /// </summary>
+    internal static class LanguageUtility {
 
-        public static void LoadAllLanguages() {
+        /// <summary>
+        /// A path to temporarily store file
+        /// </summary>
+        internal static readonly string LanguageDirectory = Path.Combine(Application.temporaryCachePath, "DC");
+
+        /// <summary>
+        /// Extracts and loads all Embedded Resource language files
+        /// </summary>
+        internal static void LoadAllLanguages() {
             TryExtractAllLanguages();
 
             foreach (var languageDir in Directory.GetDirectories(Path.Combine(LanguageDirectory, "Languages"))) {
@@ -18,6 +28,10 @@ namespace DependencyChecker.Utils {
             }
         }
 
+        /// <summary>
+        /// Loads the language file
+        /// </summary>
+        /// <param name="langDir">The directory which contains the language files</param>
         private static void LoadLanguage(DirectoryInfo langDir) {
             LoadedLanguage loadedLanguage = LanguageDatabase.AllLoadedLanguages.FirstOrDefault((LoadedLanguage lib) => lib.folderName == langDir.Name);
             if (loadedLanguage == null) {
@@ -34,11 +48,16 @@ namespace DependencyChecker.Utils {
             }
         }
 
+        /// <summary>
+        /// Parses a Embedded Resources name for a file path
+        /// </summary>
+        /// <param name="resourceName">The Embedded Resources name</param>
+        /// <returns>The path found</returns>
         private static string ParseLanguagePathFromResourceName(string resourceName) {
             string result = string.Empty;
             var splitName = resourceName.Split('.');
-            int startingIndex = splitName.FirstIndexOf(s=>s.ToLower() == "languages");
-            if ( startingIndex < 1) {
+            int startingIndex = splitName.FirstIndexOf(s => s.ToLower() == "languages");
+            if (startingIndex < 1) {
                 return null;
             }
 
@@ -53,6 +72,9 @@ namespace DependencyChecker.Utils {
             return result;
         }
 
+        /// <summary>
+        /// Attempt to extract all language files from the current assembly to a temporary directory
+        /// </summary>
         private static void TryExtractAllLanguages() {
             try {
                 foreach (var resourceName in AssemblyUtility.CurrentAssembly.GetManifestResourceNames()) {
@@ -72,7 +94,8 @@ namespace DependencyChecker.Utils {
                     }
                 }
             } catch (Exception e) {
-                throw e;
+                Log.Error("Error: " + e.Message);
+                throw;
             }
         }
     }

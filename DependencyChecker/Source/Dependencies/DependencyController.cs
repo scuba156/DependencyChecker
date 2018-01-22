@@ -6,10 +6,14 @@ using Verse;
 
 namespace DependencyChecker.Dependencies {
 
-    public static class DependencyController {
-        public static List<DependencyContainer> Dependencies { get; set; }
+    internal static class DependencyController {
+        internal static List<DependencyContainer> Dependencies { get; set; }
 
-        public static void Start(List<string> mods) {
+        /// <summary>
+        /// Currently always shows the dialog for debug purposes
+        /// </summary>
+        /// <param name="mods"></param>
+        internal static void Start(List<string> mods) {
             ParseRelevantModFiles(mods);
 
             if (Dependencies.Count > 0) {

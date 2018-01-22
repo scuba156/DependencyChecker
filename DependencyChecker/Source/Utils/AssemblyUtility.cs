@@ -10,7 +10,7 @@ namespace DependencyChecker.Utils {
         private static Assembly executingAssemblyCached;
 
         /// <summary>
-        /// Gets the executing assemblies name
+        /// Gets the executing assembly
         /// </summary>
         internal static Assembly CurrentAssembly { get { if (executingAssemblyCached == null) executingAssemblyCached = Assembly.GetExecutingAssembly();  return executingAssemblyCached; } }
 
@@ -25,12 +25,12 @@ namespace DependencyChecker.Utils {
         internal static Version CurrentAssemblyVersion { get { return CurrentAssembly.GetName().Version; } }
 
         /// <summary>
-        /// Get all assemblies that match the executing type
+        /// Get all assemblies that match the executing assembly name
         /// </summary>
         internal static List<Assembly> AllTypesOfExecutingAssemblies { get { return AppDomain.CurrentDomain.GetAssemblies().ToList().FindAll((ass => ass.GetName().Name == CurrentAssemblyName)); } }
 
         /// <summary>
-        /// Get all assemblies that match the executing type that are not the executing assembly
+        /// Get all assemblies that match the executing assembly name that are not the executing assembly instance
         /// </summary>
         internal static List<Assembly> AllTypesOfExecutingAssembliesExceptCurrent { get { return AllTypesOfExecutingAssemblies.FindAll(ass => ass.FullName != CurrentAssembly.FullName); } }
     }

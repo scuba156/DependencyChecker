@@ -3,12 +3,12 @@ using Verse;
 
 namespace DependencyChecker.Dependencies {
 
-    public class DependencyMetaData {
+    internal class DependencyMetaData {
 
-        public DependencyMetaData() {
+        internal DependencyMetaData() {
         }
 
-        public DependencyMetaData(string name, ulong steamID, string friendlyName, Version requiredVersion = null) {
+        internal DependencyMetaData(string name, ulong steamID, string friendlyName, Version requiredVersion = null) {
             //Required
             this.Name = name;
 
@@ -19,12 +19,12 @@ namespace DependencyChecker.Dependencies {
             this.RelatedModMetaData = Utils.ModUtility.GetModByName(name);
         }
 
-        public string FriendlyName { get; internal set; }
-        public string Name { get; internal set; }
-        public Version InstalledVersion { get; internal set; }
-        public string PrettyName { get { if (FriendlyName.NullOrEmpty()) return this.Name; return FriendlyName; } }
-        public ModMetaData RelatedModMetaData { get; internal set; }
-        public Version RequiredVersion { get; internal set; }
-        public ulong SteamID { get; internal set; }
+        internal string FriendlyName { get; set; }
+        internal Version InstalledVersion { get; set; }
+        internal string Name { get; set; }
+        internal string PrettyName { get { if (FriendlyName.NullOrEmpty()) return this.Name; return FriendlyName; } }
+        internal ModMetaData RelatedModMetaData { get; set; }
+        internal Version RequiredVersion { get; set; }
+        internal ulong SteamID { get; set; }
     }
 }

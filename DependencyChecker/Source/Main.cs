@@ -43,8 +43,6 @@ namespace DependencyChecker {
             if (relatedMods != null) {
                 DependencyController.Start(relatedMods);
             }
-
-            GameObjectUtility.TryDestroyGameObject();
         }
 
         /// <summary>

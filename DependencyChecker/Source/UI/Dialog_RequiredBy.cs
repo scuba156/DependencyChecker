@@ -7,14 +7,14 @@ using UnityEngine;
 using Verse;
 
 namespace DependencyChecker.UI {
-    public class Dialog_RequiredBy : Window {
+    internal class Dialog_RequiredBy : Window {
         DependencyContainer Current { get; set; }
 
         public override void DoWindowContents(Rect inRect) {
 
         }
 
-        public Dialog_RequiredBy(DependencyContainer dependency) {
+        internal Dialog_RequiredBy(DependencyContainer dependency) {
             this.closeOnEscapeKey = false;
             Current = dependency;
         }

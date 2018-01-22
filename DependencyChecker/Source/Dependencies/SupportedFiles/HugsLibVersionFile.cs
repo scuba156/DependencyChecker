@@ -5,24 +5,27 @@ using Verse;
 
 namespace DependencyChecker.Dependencies.SupportedFiles {
 
-    public class HugsLibVersionFile {
-        public const string VersionFileDir = "About";
-        public const string VersionFileName = "Version.xml";
+    /// <summary>
+    /// Handles HugsLib Version.xml files
+    /// </summary>
+    internal class HugsLibVersionFile {
+        internal const string VersionFileDir = "About";
+        internal const string VersionFileName = "Version.xml";
 
-        public static readonly string Identifier = "HugsLib";
-        public static readonly ulong SteamIDA16 = 932443910;
-        public static readonly ulong SteamIDA17 = 818773962;
-        public static readonly Version A16Version = new Version(2, 4, 5);
+        internal static readonly string Identifier = "HugsLib";
+        internal static readonly ulong SteamIDA16 = 932443910;
+        internal static readonly ulong SteamIDA17 = 818773962;
+        internal static readonly Version A16Version = new Version(2, 4, 5);
 
         private HugsLibVersionFile(XDocument doc) {
             ParseXmlDocument(doc);
         }
 
-        public Version OverrideVersion { get; private set; }
+        internal Version OverrideVersion { get; private set; }
 
-        public Version RequiredLibraryVersion { get; private set; }
+        internal Version RequiredLibraryVersion { get; private set; }
 
-        public static HugsLibVersionFile TryParseVersionFile(string rootDir) {
+        internal static HugsLibVersionFile TryParseVersionFile(string rootDir) {
             var filePath = Path.Combine(rootDir, Path.Combine(VersionFileDir, VersionFileName));
             if (!File.Exists(filePath)) return null;
             try {
